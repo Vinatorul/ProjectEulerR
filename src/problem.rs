@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 struct Problem {
-	id: u32,
+	std_id: String,
 	statement: Vec<String>,
 	name: Vec<String>,
 	authors: Vec<String>,
@@ -18,11 +18,11 @@ enum State {
 }
 
 impl Problem {
-	fn new(id: u32) -> Problem {
-		let reader = match File::open(format!("problems/{}.rs", id)) {
-				Ok(file) => file,
-				Err(err) => panic!("Unable to load problem '#{}`: {}", id, err),
-			};
+	fn new(std_id: String) -> Problem {
+		let reader = match File::open(format!("problems/{}.rs", std_id)) {
+			Ok(file) => file,
+			Err(err) => panic!("Unable to load problem '{}`: {}", std_id, err),
+		};
 		let buf = BufReader::new(&reader);
 		let mut statement = vec![];
 		let mut name = vec![];
@@ -56,7 +56,7 @@ impl Problem {
 			}
 		}
 		Problem {
-			id: id,
+			std_id: std_id,
 			statement: statement,
 			name: name,
 			authors: authors,
@@ -67,8 +67,8 @@ impl Problem {
 
 #[test]
 fn read_test() {
-	let p = Problem::new(0);
-	assert_eq!(p.id, 0);
+	let p = Problem::new("0".to_string());
+	assert_eq!(p.std_id, "0");
 	assert_eq!(p.authors, vec!["Testhor", "qwerty"]);
 	assert_eq!(p.name, vec!["Test name", "check"]);
 	assert_eq!(p.statement, vec!["Test statement", "3", "4"]);
