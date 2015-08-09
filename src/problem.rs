@@ -28,33 +28,33 @@ impl Problem {
 		let mut name = vec![];
 		let mut authors = vec![];
 		let mut input = vec![];
-	    let mut state = State::Default;
-	    let mut info = false;
-	    for line in buf.lines()  {
-	    	let l = line.unwrap();
-	    	if !info {
-	    		if l == "/* [info]" {
-		    		info = true;
-	    		}
-		    	continue;
-	    	}
-	        match l.as_ref() {
-	        	"[authors]" => state = State::Authors,
-	        	"[name]" => state = State::Name,
-	        	"[statement]" => state = State::Statement,
-	        	"[input]" => state = State::Input,
-	        	"[end] */" => break,
-	        	_ => {
-	        		match state {
-	        			State::Authors => authors.push(l.trim().to_string()),
-	        			State::Name => name.push(l.trim().to_string()),
-	        			State::Statement => statement.push(l.trim().to_string()),
-	        			State::Input => input.push(l.trim().to_string()),
-	        			_ => continue
-	        		}
-	        	}
-	        }
-	    } 
+		let mut state = State::Default;
+		let mut info = false;
+		for line in buf.lines()  {
+			let l = line.unwrap();
+			if !info {
+				if l == "/* [info]" {
+					info = true;
+				}
+				continue;
+			}
+			match l.as_ref() {
+				"[authors]" => state = State::Authors,
+				"[name]" => state = State::Name,
+				"[statement]" => state = State::Statement,
+			 	"[input]" => state = State::Input,
+				"[end] */" => break,
+				_ => {
+					match state {
+						State::Authors => authors.push(l.trim().to_string()),
+						State::Name => name.push(l.trim().to_string()),
+						State::Statement => statement.push(l.trim().to_string()),
+						State::Input => input.push(l.trim().to_string()),
+						_ => continue
+					}
+				}
+			}
+		}
 		Problem {
 			id: id,
 			statement: statement,
