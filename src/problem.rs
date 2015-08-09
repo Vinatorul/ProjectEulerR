@@ -3,14 +3,18 @@ use std::io::{BufRead, BufReader};
 
 struct Problem {
 	id: u32,
-	statement: String,
-	name: String,
+	statement: Vec<String>,
+	name: Vec<String>,
+	authors: Vec<String>,
+	input: Vec<String>
 }
 
 enum State {
 	Default,
 	Name,
 	Statement,
+	Authors,
+	Input
 }
 
 impl Problem {
@@ -20,29 +24,32 @@ impl Problem {
 				Err(err) => panic!("Unable to load problem '#{}`: {}", id, err),
 			};
 		let buf = BufReader::new(&reader);
-		let mut statement = String::new();
-		let mut name = String::new();
+		let mut statement = vec![];
+		let mut name = vec![];
+		let mut authors = vec![];
+		let mut input = vec![];
 	    let mut state = State::Default;
+	    let mut info = false;
 	    for line in buf.lines()  {
 	    	let l = line.unwrap();
+	    	if !info {
+	    		if l == "/* [info]" {
+		    		info = true;
+	    		}
+		    	continue;
+	    	}
 	        match l.as_ref() {
-	        	"/// [name]" => state = State::Name,
-	        	"/// [statement]" => state = State::Statement,
-	        	"/// [end]" => break,
+	        	"[authors]" => state = State::Authors,
+	        	"[name]" => state = State::Name,
+	        	"[statement]" => state = State::Statement,
+	        	"[input]" => state = State::Input,
+	        	"[end] */" => break,
 	        	_ => {
 	        		match state {
-	        			State::Name => {
-	        				if !name.is_empty() {
-	        					name.push('\n');
-	        				}
-	        				name.push_str(&l[3..].trim())
-	        			},
-	        			State::Statement => {
-	        				if !statement.is_empty() {
-	        					statement.push('\n');
-	        				}
-	        				statement.push_str(&l[3..].trim())
-	        			},
+	        			State::Authors => authors.push(l.trim().to_string()),
+	        			State::Name => name.push(l.trim().to_string()),
+	        			State::Statement => statement.push(l.trim().to_string()),
+	        			State::Input => input.push(l.trim().to_string()),
 	        			_ => continue
 	        		}
 	        	}
@@ -52,6 +59,8 @@ impl Problem {
 			id: id,
 			statement: statement,
 			name: name,
+			authors: authors,
+			input: input,
 		}
 	}
 }
@@ -59,6 +68,9 @@ impl Problem {
 #[test]
 fn read_test() {
 	let p = Problem::new(0);
-	assert_eq!(p.name, "Test name\ncheck");
-	assert_eq!(p.statement, "Test statement\n3\n4");
+	assert_eq!(p.id, 0);
+	assert_eq!(p.authors, vec!["Testhor", "qwerty"]);
+	assert_eq!(p.name, vec!["Test name", "check"]);
+	assert_eq!(p.statement, vec!["Test statement", "3", "4"]);
+	assert_eq!(p.input, vec!["1sd", "check", "123"]);
 }
