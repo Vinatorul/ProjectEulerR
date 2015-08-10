@@ -67,8 +67,8 @@ impl Problem {
 
 #[test]
 fn read_test() {
-	let p = Problem::new("0".to_string());
-	assert_eq!(p.std_id, "0");
+	let p = Problem::new("test".to_string());
+	assert_eq!(p.std_id, "test");
 	assert_eq!(p.authors, vec!["Testhor", "qwerty"]);
 	assert_eq!(p.name, vec!["Test name", "check"]);
 	assert_eq!(p.statement, vec!["Test statement", "3", "4"]);
