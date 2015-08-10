@@ -1,4 +1,4 @@
 [package]
-name = "project_euler"
+name = "rusty_checker"
 version = "0.1.0"
 authors = ["Alexander Kuvaev <alexander@kuvaev.me>"]
