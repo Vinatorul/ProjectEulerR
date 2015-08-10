@@ -20,32 +20,33 @@ enum State {
 
 impl Problem {
 	fn new(str_id: String) -> Problem {
-		let reader = match File::open(format!("{}/{}/info.txt", PROBLEMS_DIR, str_id)) {
-			Ok(file) => file,
-			Err(err) => panic!("Unable to load problem '{}`: {}", str_id, err),
-		};
-		let buf = BufReader::new(&reader);
 		let mut statement = vec![];
 		let mut name = vec![];
 		let mut authors = vec![];
-		let mut state = State::Default;
-		for line in buf.lines()  {
-			let l = line.unwrap();
-			match l.as_ref() {
-				"[authors]" => state = State::Authors,
-				"[name]" => state = State::Name,
-				"[statement]" => state = State::Statement,
-				"[end]" => break,
-				_ => {
-					match state {
-						State::Authors => authors.push(l.trim().to_string()),
-						State::Name => name.push(l.trim().to_string()),
-						State::Statement => statement.push(l.trim().to_string()),
-						_ => continue
+		match File::open(format!("{}/{}/info.txt", PROBLEMS_DIR, str_id)) {
+			Ok(file) => {
+				let buf = BufReader::new(&file);
+				let mut state = State::Default;
+				for line in buf.lines()  {
+					let l = line.unwrap();
+					match l.as_ref() {
+						"[authors]" => state = State::Authors,
+						"[name]" => state = State::Name,
+						"[statement]" => state = State::Statement,
+						"[end]" => break,
+						_ => {
+							match state {
+								State::Authors => authors.push(l.trim().to_string()),
+								State::Name => name.push(l.trim().to_string()),
+								State::Statement => statement.push(l.trim().to_string()),
+								_ => continue
+							}
+						}
 					}
 				}
-			}
-		}
+			},
+			Err(err) => println!("Unable to load problem \"{}\" info: {}", str_id, err),
+		};
 		Problem {
 			str_id: str_id,
 			statement: statement,
