@@ -1,10 +1,13 @@
 use std::fs::File;
-use std::io::{BufRead, BufReader};
-use std::process::Command;
+use std::process::{Command, Stdio};
+use std::io::prelude::*;
+use std::io::BufReader;
 
 const PROBLEMS_DIR: &'static str = "problems";
+const INPUT_DIR: &'static str = "input";
+const OUTPUT_DIR: &'static str = "output";
 
-struct Problem {
+pub struct Problem {
 	str_id: String,
 	statement: Vec<String>,
 	name: Vec<String>,
@@ -19,7 +22,7 @@ enum State {
 }
 
 impl Problem {
-	fn new(str_id: String) -> Problem {
+	pub fn new(str_id: String) -> Problem {
 		let mut statement = vec![];
 		let mut name = vec![];
 		let mut authors = vec![];
@@ -64,14 +67,38 @@ impl Problem {
 			.unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 
 		if builder.status.success() {
-			let problem = Command::new(format!("{}/{}/{}", PROBLEMS_DIR, self.str_id, self.str_id))
-				.output()
-				.unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
-			let s = String::from_utf8_lossy(&problem.stdout);
-			println!("{}", s);
+			self.run_test(1);	
 		} else {
 			let s = String::from_utf8_lossy(&builder.stderr);
 			panic!("rustc failed to build problem {}:\n{}", self.str_id, s);
+		}
+	}
+
+	fn run_test(&self, test_no: u32) {
+		let mut input = File::open(format!("{}/{}/{}/{}.txt", PROBLEMS_DIR, self.str_id, INPUT_DIR, test_no))
+			.unwrap_or_else(|e| { panic!("failed to load test \"{}\": {}", test_no, e) });
+		let mut s = String::new();
+		input.read_to_string(&mut s)
+			.unwrap_or_else(|e| { panic!("couldn't read test \"{}\" file: {}", test_no, e) });
+
+		let problem = Command::new(format!("{}/{}/{}", PROBLEMS_DIR, self.str_id, self.str_id))
+			.stdin(Stdio::piped())
+        	.stdout(Stdio::piped())
+			.spawn()
+			.unwrap_or_else(|e| { panic!("failed to execute test \"{}\": {}", test_no, e) });
+		
+        problem.stdin.unwrap().write_all(s.as_bytes())
+        	.unwrap_or_else(|e| { panic!("couldn't write stdin test \"{}\": {}", test_no, e) });
+        {
+		    let mut s = String::new();
+		    problem.stdout.unwrap().read_to_string(&mut s)
+		    	.unwrap_or_else(|e| { panic!("couldn't read stdout test \"{}\": {}", test_no, e) });
+
+		    let mut output = File::create(format!("{}/{}/{}/{}.txt", PROBLEMS_DIR, self.str_id, OUTPUT_DIR, test_no))
+				.unwrap_or_else(|e| { panic!("failed to save test \"{}\" output: {}", test_no, e) }); 
+
+			output.write_all(s.as_bytes())
+				.unwrap_or_else(|e| { panic!("couldn't write test \"{}\" answer: {}", test_no, e) });
 		}
 	}
 }
