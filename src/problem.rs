@@ -83,18 +83,18 @@ impl Problem {
 
 		let problem = Command::new(format!("{}/{}/{}", PROBLEMS_DIR, self.str_id, self.str_id))
 			.stdin(Stdio::piped())
-        	.stdout(Stdio::piped())
+			.stdout(Stdio::piped())
 			.spawn()
 			.unwrap_or_else(|e| { panic!("failed to execute test \"{}\": {}", test_no, e) });
 		
-        problem.stdin.unwrap().write_all(s.as_bytes())
-        	.unwrap_or_else(|e| { panic!("couldn't write stdin test \"{}\": {}", test_no, e) });
-        {
-		    let mut s = String::new(); // passing throw String coz as_slice still unstable
-		    problem.stdout.unwrap().read_to_string(&mut s)
-		    	.unwrap_or_else(|e| { panic!("couldn't read stdout test \"{}\": {}", test_no, e) });
+		problem.stdin.unwrap().write_all(s.as_bytes())
+			.unwrap_or_else(|e| { panic!("couldn't write stdin test \"{}\": {}", test_no, e) });
+		{
+			let mut s = String::new(); // passing throw String coz as_slice still unstable
+			problem.stdout.unwrap().read_to_string(&mut s)
+				.unwrap_or_else(|e| { panic!("couldn't read stdout test \"{}\": {}", test_no, e) });
 
-		    let mut output = File::create(format!("{}/{}/{}/{}.txt", PROBLEMS_DIR, self.str_id, OUTPUT_DIR, test_no))
+			let mut output = File::create(format!("{}/{}/{}/{}.txt", PROBLEMS_DIR, self.str_id, OUTPUT_DIR, test_no))
 				.unwrap_or_else(|e| { panic!("failed to save test \"{}\" output: {}", test_no, e) }); 
 
 			output.write_all(s.as_bytes())
