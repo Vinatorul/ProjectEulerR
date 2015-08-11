@@ -77,7 +77,7 @@ impl Problem {
 	fn run_test(&self, test_no: u32) {
 		let mut input = File::open(format!("{}/{}/{}/{}.txt", PROBLEMS_DIR, self.str_id, INPUT_DIR, test_no))
 			.unwrap_or_else(|e| { panic!("failed to load test \"{}\": {}", test_no, e) });
-		let mut s = String::new();
+		let mut s = String::new(); // passing throw String coz as_slice still unstable
 		input.read_to_string(&mut s)
 			.unwrap_or_else(|e| { panic!("couldn't read test \"{}\" file: {}", test_no, e) });
 
@@ -90,7 +90,7 @@ impl Problem {
         problem.stdin.unwrap().write_all(s.as_bytes())
         	.unwrap_or_else(|e| { panic!("couldn't write stdin test \"{}\": {}", test_no, e) });
         {
-		    let mut s = String::new();
+		    let mut s = String::new(); // passing throw String coz as_slice still unstable
 		    problem.stdout.unwrap().read_to_string(&mut s)
 		    	.unwrap_or_else(|e| { panic!("couldn't read stdout test \"{}\": {}", test_no, e) });
 
