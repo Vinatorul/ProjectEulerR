@@ -1,9 +1,11 @@
+use std::fs;
 use std::fs::File;
 use std::process::{Command, Stdio};
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::error::Error;
 use std::fmt;
+
 
 const PROBLEMS_DIR: &'static str = "problems";
 const INPUT_DIR: &'static str = "input";
@@ -147,6 +149,10 @@ impl Problem {
 			return self.make_error("couldn't read stdout from test", result.err().unwrap().to_string(), test_no);
 		}
 
+		let result = fs::create_dir_all(format!("{}/{}/{}", PROBLEMS_DIR, self.str_id, OUTPUT_DIR));
+		if result.is_err() {
+			return self.make_error("couldn't write test answer", result.err().unwrap().to_string(), test_no);
+		}
 		let mut output = match File::create(format!("{}/{}/{}/{}.txt", 
 			PROBLEMS_DIR, self.str_id, OUTPUT_DIR, test_no)) {
 			Ok(file) => file,
